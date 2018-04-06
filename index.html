@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>LRC Maker</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    
+    <script src="js/jquery.min.js"></script>
+    <script src="js/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="js/bootstrap.min.js.1" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    <script src="js/vue.js"></script>
+    <script src="js/lrcparser.js"></script>
+    <script 
+    <script src="js/highlight.min.js"></script>
+    <link rel="stylesheet" href="css/highlight.light.css">
+    <style> 
+    body { background-color: #fff; } 
+    .mt140 { margin-top: 100px; }
+    .mt50 { margin-top: 30px; }
+    .pl10p { padding-left: 10%; }
+    .np { color: #666; }
+    .actr { text-align: center; }
+    .fw { width: 100%; }
+    .sm-gray { font-size: 13px; color: #aaa; }
+    .lg-btn-d { width: 400px; }
+    .ph-200 { height: 200px; }
+    .ph-100 { height: 100px; }
+    .ph-50 { height: 50px; }
+    .tb-lg { background-color: #eee; border-radius: 5px; font-size: 19px; padding: 10px; border:none; outline: none; width: 600px; }
+    .hidden { display: none; }
+    key {  }
+    .tb-fw { width: 100%; border:none; outline:none; }
+    .timestamp { margin-right: 15px; width: 80px; height: 22px; font-family: monospace; float: left !important; text-align: center; line-height: 22px; border: 1px solid #ccc; background: #ccc; display:inline-block !important; vertical-align: center; }
+    .cw { color: white !important; }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top">
+        <a class="navbar-brand" href="#">LRC Maker</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav">
+            
+            
+          </ul>
+        </div>
+      </nav>
+
+      <div class="container" id="app">
+
+            <div class="jumbotron mt140" v-if="step=='welcome'">
+                    <h1 class="display-4">Welcome to use LRC Maker</h1>
+                    <p class="lead">打开一个音乐和歌词文件开始制作吧！</p>
+                    <hr class="my-4">
+                    <p>选择一个音乐文件</p>
+                    <div id="accordion">
+                            <div class="card">
+                              <div class="card-header" id="headingOne">
+                                <h5 class="mb-0">
+                                  <input type="file" class="hidden" id="openFile" @change="loadLocalMusic()"/>
+                                  <button class="btn btn-link" data-toggle="collapse" data-target="#localMusic" aria-expanded="true" aria-controls="collapseOne">
+                                    本地文件
+                                  </button>
+                                </h5>
+                              </div>
+                          
+                              <div id="localMusic" class="collapse" aria-labelledby="headingOne" data-parent="#accordion">
+                                <div class="card-body">
+                                    <p>
+                                        选择一个音乐文件
+                                    </p>
+                                    <button class="btn btn-primary btn-md lg-btn-d1" href="#" role="button" onclick="$('#openFile').click()">浏览...</button>
+                                    
+                                </div>
+                              </div>
+                            </div>
+                            <div class="card">
+                              <div class="card-header" id="headingTwo">
+                                <h5 class="mb-0">
+                                  <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#fromURL" aria-expanded="false" aria-controls="collapseTwo">
+                                    URL
+                                  </button>
+                                </h5>
+                              </div>
+                              <div id="fromURL" class="collapse" aria-labelledby="headingTwo" data-parent="#accordion">
+                                <div class="card-body">
+                                    
+                                    <input type="text" class="tb-fw" placeholder="输入URL" v-model="musicURL"/>                                        
+                                    
+                                    
+                                </div>
+                              </div>
+                            </div>
+                            
+                          </div>
+
+                    <p class="mt50">选择一个歌词文件</p>
+                    <el-dropdown v-model="lyricType" :options="[1,2]" :display="['纯文本格式','LRC格式']" placeholder="纯文本格式">
+
+                    </el-dropdown>
+                    <div id="accordionLyric">
+                            <div class="card">
+                              <div class="card-header" id="headingOne1">
+                                <h5 class="mb-0">
+                                  <button class="btn btn-link" data-toggle="collapse" data-target="#localLyric" aria-expanded="true" aria-controls="collapseOne">
+                                    本地文件
+                                  </button>
+                                </h5>
+                              </div>
+                          
+                              <div id="localLyric" class="collapse" aria-labelledby="headingOne1" data-parent="#accordionLyric">
+                                <div class="card-body">
+                                    <p>
+                                        选择一个歌词文件
+                                    </p>
+                                  <input type="file" class="hidden" id="openLyric" @change="loadLocalLyric()"/>                                    
+                                    <button class="btn btn-primary btn-md lg-btn-d1" href="#" role="button" onclick="$('#openLyric').click()">浏览...</button>
+                                    
+                                </div>
+                              </div>
+                            </div>
+                            <div class="card">
+                              <div class="card-header" id="headingTwo1">
+                                <h5 class="mb-0">
+                                  <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#inputLyric" aria-expanded="false" aria-controls="collapseTwo">
+                                    输入歌词
+                                  </button>
+                                </h5>
+                              </div>
+                              <div id="inputLyric" class="collapse" aria-labelledby="headingTwo1" data-parent="#accordionLyric">
+                                <div class="card-body">
+                                    <textarea class="tb-fw ph-200" v-model="lyricText" placeholder="在这里输入歌词..."></textarea>
+                                  
+                                </div>
+                              </div>
+                            </div>
+                            
+                          </div>
+
+                    
+                    <p class="lead mt50 fw">
+                            <button :class="['btn btn-primary btn-lg lg-btn-d', musicURL=='' || lyricText==''?'disabled':''] " style="margin: 0 auto;" href="#" role="button" @click="startMaking()">开始制作</button>
+                        
+                    </p>
+            </div>
+
+            <div class="mt140" v-show="step == 'making'">
+              <div class="row col-12">
+                <div class="col col-sm-6">
+                  <div class="list-group">
+                    <el-lyricgroup v-model="lyrics" ref="lyricBox"></el-lyricgroup>
+                    
+                  </div>
+                </div>
+                <div class="col col-sm-6">
+                    <audio id="audio" style="display: none" @timeupdate="_audio_change"></audio>
+                    <div>
+                      <p>{{playtimeStringShort}}/{{durationString}}</p>
+                      <el-progress-bar v-model="playPercentage"></el-progress-bar>
+                    </div>
+                    <div class="mt50">
+                      <button type="button" class="btn btn-success" @click="addTimeTag()">Add Timetag [{{playtimeString}}]</button>  
+                      <br/><br/><p>Play Control</p>                                          
+                      <button type="button" class="btn btn-primary" onclick="$('audio')[0].play().then(function() { vm.getDurationStr(); })">Play</button>
+                      <button type="button" class="btn btn-light" onclick="$('audio')[0].pause()">Pause</button>
+                      <button type="button" class="btn btn-light" @click="seekRelative(5)">Seek forward</button>                      
+                      <button type="button" class="btn btn-light" @click="seekRelative(-5)">Seek back</button>
+                      <br/><br/><p>Lyric</p>                                          
+                      <button type="button" class="btn btn-light" onclick="vm.$refs.lyricBox.moveToNext()">Move to next</button>
+                      <button type="button" class="btn btn-light" onclick="vm.$refs.lyricBox.moveToPrevious()">Move to previous</button>
+                      <br/>
+                      <br/>
+                      <button type="button" class="btn btn-primary" @click="exportlrc()">Preview LRC</button>    
+                      <button type="button" class="btn btn-primary" @click="downloadLRC()">Download LRC</button>                      
+                                        
+                      <div class="well">
+                        <p>Click 'Play' to play music, you may need to wait for a while if play an online music.</p>
+                        <p>You can seek music by clicking progress bar.</p>
+                      </div>
+                      
+                    </div>
+                </div>
+              </div>
+            </div>
+
+            <form id="download" action="api/download.php" method="POST" class="hidden">
+              <input id="dlcontent" type="hidden" name="content" value=""/>
+            </form>
+            <div class="modal fade" id="resultModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered modal-lg" role="document" >
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h5 class="modal-title" id="exampleModalLongTitle">LRC格式</h5>
+                      <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                      </button>
+                    </div>
+                    <div class="modal-body" v-html="exportedLyric" style="font-family: monospace">
+                          
+                    </div>
+                    <div class="modal-footer">
+                      <button type="button" class="btn btn-primary" data-dismiss="modal">确定</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              
+        </div> 
+      <script src="js/el-select.js"></script>
+      <script src="js/el-lyricbox.js"></script>
+      <script src="js/vue-components.js"></script>
+      <script src="js/index.js"></script>
+</body>
+</html>
