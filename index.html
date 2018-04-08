@@ -34,6 +34,7 @@
     .tb-fw { width: 100%; border:none; outline:none; }
     .timestamp { margin-right: 15px; width: 80px; height: 22px; font-family: monospace; float: left !important; text-align: center; line-height: 22px; border: 1px solid #ccc; background: #ccc; display:inline-block !important; vertical-align: center; }
     .cw { color: white !important; }
+    span:focus { min-width: 50%; }
     </style>
 </head>
 <body>
@@ -54,16 +55,16 @@
 
             <div class="jumbotron mt140" v-if="step=='welcome'">
                     <h1 class="display-4">Welcome to use LRC Maker</h1>
-                    <p class="lead">打开一个音乐和歌词文件开始制作吧！</p>
+                    <p class="lead">Open a music file and start making!</p>
                     <hr class="my-4">
-                    <p>选择一个音乐文件</p>
+                    <p>选择一个音乐文件 / Choose a music file</p>
                     <div id="accordion">
                             <div class="card">
                               <div class="card-header" id="headingOne">
                                 <h5 class="mb-0">
                                   <input type="file" class="hidden" id="openFile" @change="loadLocalMusic()"/>
                                   <button class="btn btn-link" data-toggle="collapse" data-target="#localMusic" aria-expanded="true" aria-controls="collapseOne">
-                                    本地文件
+                                    本地文件 / Local File
                                   </button>
                                 </h5>
                               </div>
@@ -71,10 +72,10 @@
                               <div id="localMusic" class="collapse" aria-labelledby="headingOne" data-parent="#accordion">
                                 <div class="card-body">
                                     <p>
-                                        选择一个音乐文件
+                                        选择一个音乐文件 / Select a music file
                                     </p>
-                                    <button class="btn btn-primary btn-md lg-btn-d1" href="#" role="button" onclick="$('#openFile').click()">浏览...</button>
-                                    
+                                    <button class="btn btn-primary btn-md lg-btn-d1" href="#" role="button" onclick="$('#openFile').click()">浏览... /  Browse...</button>
+                                    {{ musicFileName }}
                                 </div>
                               </div>
                             </div>
@@ -89,7 +90,7 @@
                               <div id="fromURL" class="collapse" aria-labelledby="headingTwo" data-parent="#accordion">
                                 <div class="card-body">
                                     
-                                    <input type="text" class="tb-fw" placeholder="输入URL" v-model="musicURL"/>                                        
+                                    <input type="text" class="tb-fw" placeholder="输入URL / Input URL" v-model="musicURL"/>                                        
                                     
                                     
                                 </div>
@@ -98,8 +99,8 @@
                             
                           </div>
 
-                    <p class="mt50">选择一个歌词文件</p>
-                    <el-dropdown v-model="lyricType" :options="[1,2]" :display="['纯文本格式','LRC格式']" placeholder="纯文本格式">
+                    <p class="mt50">选择一个歌词文件 / Choose a lyric file</p>
+                    <el-dropdown v-model="lyricType" :options="[1,2]" :display="['纯文本格式 / Plain Text','LRC格式 / LRC Format']" placeholder="纯文本格式 / Plain Text">
 
                     </el-dropdown>
                     <div id="accordionLyric">
@@ -107,7 +108,7 @@
                               <div class="card-header" id="headingOne1">
                                 <h5 class="mb-0">
                                   <button class="btn btn-link" data-toggle="collapse" data-target="#localLyric" aria-expanded="true" aria-controls="collapseOne">
-                                    本地文件
+                                    本地文件 / Local File
                                   </button>
                                 </h5>
                               </div>
@@ -115,11 +116,11 @@
                               <div id="localLyric" class="collapse" aria-labelledby="headingOne1" data-parent="#accordionLyric">
                                 <div class="card-body">
                                     <p>
-                                        选择一个歌词文件
+                                        选择一个歌词文件 / Choose a lyric file
                                     </p>
                                   <input type="file" class="hidden" id="openLyric" @change="loadLocalLyric()"/>                                    
-                                    <button class="btn btn-primary btn-md lg-btn-d1" href="#" role="button" onclick="$('#openLyric').click()">浏览...</button>
-                                    
+                                    <button class="btn btn-primary btn-md lg-btn-d1" href="#" role="button" onclick="$('#openLyric').click()">浏览... / Browse...</button>
+                                    {{ lyricFileName }}                                    
                                 </div>
                               </div>
                             </div>
@@ -127,13 +128,13 @@
                               <div class="card-header" id="headingTwo1">
                                 <h5 class="mb-0">
                                   <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#inputLyric" aria-expanded="false" aria-controls="collapseTwo">
-                                    输入歌词
+                                    输入歌词 / Manually input 
                                   </button>
                                 </h5>
                               </div>
                               <div id="inputLyric" class="collapse" aria-labelledby="headingTwo1" data-parent="#accordionLyric">
                                 <div class="card-body">
-                                    <textarea class="tb-fw ph-200" v-model="lyricText" placeholder="在这里输入歌词..."></textarea>
+                                    <textarea class="tb-fw ph-200" v-model="lyricText" placeholder="在这里输入歌词...\nInput lyric here..."></textarea>
                                   
                                 </div>
                               </div>
@@ -143,7 +144,7 @@
 
                     
                     <p class="lead mt50 fw">
-                            <button :class="['btn btn-primary btn-lg lg-btn-d', musicURL=='' || lyricText==''?'disabled':''] " style="margin: 0 auto;" href="#" role="button" @click="startMaking()">开始制作</button>
+                            <button :class="['btn btn-primary btn-lg lg-btn-d', musicURL=='' || lyricText==''?'disabled':''] " style="margin: 0 auto;" href="#" role="button" @click="startMaking()">开始制作 / Start Making</button>
                         
                     </p>
             </div>
@@ -163,19 +164,34 @@
                       <el-progress-bar v-model="playPercentage"></el-progress-bar>
                     </div>
                     <div class="mt50">
-                      <button type="button" class="btn btn-success" @click="addTimeTag()">Add Timetag [{{playtimeString}}]</button>  
-                      <br/><br/><p>Play Control</p>                                          
-                      <button type="button" class="btn btn-primary" onclick="$('audio')[0].play().then(function() { vm.getDurationStr(); })">Play</button>
-                      <button type="button" class="btn btn-light" onclick="$('audio')[0].pause()">Pause</button>
-                      <button type="button" class="btn btn-light" @click="seekRelative(5)">Seek forward</button>                      
-                      <button type="button" class="btn btn-light" @click="seekRelative(-5)">Seek back</button>
-                      <br/><br/><p>Lyric</p>                                          
-                      <button type="button" class="btn btn-light" onclick="vm.$refs.lyricBox.moveToNext()">Move to next</button>
-                      <button type="button" class="btn btn-light" onclick="vm.$refs.lyricBox.moveToPrevious()">Move to previous</button>
+                      <button type="button" class="btn btn-success" @click="addTimeTag()" title="Add Timetag [ENTER]">Add Timetag [{{playtimeString}}]</button>  
+                      <br/><br/><p>Play Control</p>    
+                      <div class="btn-group" role="group" aria-label="Button group with nested dropdown">                                                            
+                        <button type="button" class="btn btn-primary" onclick="$('audio')[0].play().then(function() { vm.getDurationStr(); })" title="Play Music">Play</button>
+                        <button type="button" class="btn btn-light" onclick="$('audio')[0].pause()" title="Pause Music">Pause</button>
+                        <button type="button" class="btn btn-light" @click="seekRelative(5)" title="Seek forward 5 seconds">Seek forward</button>                      
+                        <button type="button" class="btn btn-light" @click="seekRelative(-5)" title="Seek back 5 seconds">Seek backward</button>
+                      </div>
+                        <br/><br/><p>Lyric</p>  
+                      <div class="btn-group" role="group" aria-label="Button group with nested dropdown">
+                        <button type="button" class="btn btn-light" @click="moveToNext()" title="Move to next lyric [UP]">Move to next</button>
+                        <button type="button" class="btn btn-light" @click="moveToPrevious()" title="Move to previous lyric [DOWN]">Move to previous</button>
+                        <div class="btn-group" role="group">
+                          <button id="btnGroupDrop1" type="button" class="btn btn-light dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            More Actions
+                          </button>
+                          <div class="dropdown-menu" aria-labelledby="btnGroupDrop1">
+                            <a class="dropdown-item" href="javascript:void(0)" @click="addNewLine()">Add an empty line</a>
+                            <a class="dropdown-item" href="javascript:void(0)" @click="removeLine()">Remove selected line</a>
+                          </div>
+                        </div>
+                      </div>                                        
+                     
                       <br/>
                       <br/>
                       <button type="button" class="btn btn-primary" @click="exportlrc()">Preview LRC</button>    
-                      <button type="button" class="btn btn-primary" @click="downloadLRC()">Download LRC</button>                      
+                      <button type="button" class="btn btn-primary" @click="downloadLRC()">Download LRC</button>   
+                      <button type="button" class="btn btn-light" @click="step = 'welcome'" title="Move to next lyric [UP]">Back &amp; Edit Lyrics</button>                                         
                                         
                       <div class="well">
                         <p>Click 'Play' to play music, you may need to wait for a while if play an online music.</p>

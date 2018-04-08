@@ -92,9 +92,14 @@ function LRCParser(lrcText) {
 					else if (tagName == LP_TAG_BY) this.lyricInfo.by = val;
 				}
 				if (!this.match(']', '] expected')) continue;
-			} while (this.look.tag == '[' && !this.forceNextLine);
+			} while (this.look != null && this.look.tag == '[' && !this.forceNextLine);
 			console.log(timePoints);
-			if (this.look.tag == LP_TAG_STRING) {
+			if (this.look == null) {
+				for (let i=0; i<timePoints.length; ++i)
+					this.lyrics.push({ time: timePoints[i], lyric: '' });
+				break;
+			}
+			else if (this.look.tag == LP_TAG_STRING) {
 				let l = this.look.val; this.next();
 				for (let i=0; i<timePoints.length; ++i) {
 					this.lyrics.push({ time: timePoints[i], lyric: l });

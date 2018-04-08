@@ -1,3 +1,8 @@
+(function(){
+Vue.config.devtools = !false;
+Vue.config.debug = !false;
+Vue.config.silent = !true;
+
 let vm = new Vue({
     el: '#app',
     data: {
@@ -5,6 +10,8 @@ let vm = new Vue({
         musicURL: "",
         lyricText: "",
         step: 'welcome',
+        musicFileName: "",
+        lyricFileName: "",
 
         lyrics: [ ],
         //playPercentage: 0,
@@ -34,11 +41,15 @@ let vm = new Vue({
             });
         },
         loadLocalMusic() {
+            this.musicFileName = $("#openFile")[0].files[0].name;
             this.readFile("#openFile").then((e)=> {
                 this.musicURL = e.target.result;
             });
         },
         loadLocalLyric() {
+            this.lyricFileName = $("#openLyric")[0].files[0].name;   
+            if (/\.lrc$/.test(this.lyricFileName))
+                this.lyricType = 2;
             this.readFile("#openLyric", 'txt').then((e)=> {
                 this.lyricText = e.target.result;
             });
@@ -49,7 +60,10 @@ let vm = new Vue({
             this.playPerc = document.getElementById('audio').currentTime;
         },
         startMaking() {
-            if (this.musicURL=='' || this.lyricText=='') return ;
+            if (this.musicURL=='' || this.lyricText=='') {
+                alert('请选择歌词和音乐。\nPlease choose lyric and music')
+                return ;
+            }
             this.step = 'making';
             this.lyrics = this.makeLyrics();
             //this.$refs.lyricBox.moveTo(0);
@@ -79,7 +93,6 @@ let vm = new Vue({
                     return i;
             return -1;
         },
-
         makeLyrics() {
             if (this.lyricType == 1) {
                 // Plain Text
@@ -91,7 +104,10 @@ let vm = new Vue({
             }
             else {
                 // Lrc Type
-                return new LRCParser(this.lyricText).getLyric().map((v) => Object.assign( v, { active: false } ));
+                let lp = new LRCParser(this.lyricText);
+                lp.getLyric();
+                console.log(lp.lyrics);
+                return lp.lyrics.map((v) => Object.assign( v, { active: false } ));
             }
         },
         addTimeTag() {
@@ -113,6 +129,20 @@ let vm = new Vue({
             let lyric = this.lyrics.map(v=>`[${parseInt(v.time/1000/60)}:${String(parseInt(v.time/1000%60)).padStart(2, '0')}.${String(v.time % 1000).padStart(3, '0')}]${v.lyric}`).join('\n');
             $("#dlcontent").val(lyric);
             $('#download').submit();
+        },
+
+        // Lyric
+        addNewLine() {
+            this.lyrics.splice(this.getSelectedLyricIndex() + 1, 0, { time: undefined, lyric: '', active: false });
+        },
+        removeLine() {
+            this.getSelectedLyricIndex() != -1 && this.lyrics.splice(this.getSelectedLyricIndex(), 1)
+        },
+        moveToNext() {
+            this.$refs.lyricBox.moveToNext();
+        },
+        moveToPrevious() {
+            this.$refs.lyricBox.moveToPrevious()
         }
     },
     watch: {
@@ -135,3 +165,22 @@ let vm = new Vue({
         }
     }
 });
+
+$(document).keyup(function(e) {
+    //      38
+    //  37  40  39
+    if (vm.step != 'making') return;
+
+    let kc = e.keyCode;
+    // 方向键上  上一句歌词
+    if (kc == 38) vm.$refs.lyricBox.moveToPrevious();
+    // 方向键下  下一句歌词
+    else if (kc == 40) vm.$refs.lyricBox.moveToNext();
+    // 方向键右  前进5秒
+    else if (kc == 39) vm.seekRelative(5);
+    // 方向键左  后退5秒
+    else if (kc == 37) vm.seekRelative(-5);
+    // 回车  插入一个timetag
+    else if (kc == 13) vm.addTimeTag();  
+});
+})();

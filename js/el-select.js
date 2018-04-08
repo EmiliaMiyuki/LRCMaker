@@ -45,6 +45,7 @@ Vue.component('elDropdown', {
     watch: {
         value(val) {
             this.$emit('input', val);
+            this.selected = this.options.indexOf(val);
         }
     }
 });

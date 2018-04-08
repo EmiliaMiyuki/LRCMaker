@@ -1,8 +1,24 @@
+Vue.component('elEditable', {
+    template: `
+        <span contenteditable="true" v-html="innerText" @keydown.13.capture.prevent.stop @input="changeText" style="outline: none; display: inline-block;"></span>
+        `,
+    props: [ 'value' ],
+    data(){
+        return { innerText: this.value }
+    },
+    methods:{
+        changeText(){
+            this.innerText = this.$el.innerHTML;
+            this.$emit('input',this.innerText);
+        }
+    }
+});
+
 Vue.component('elLyricbox', {
     template: `
         <a :class="['list-group-item', on ? 'active cw':'']" @click="value.active = true">
             <input class="badge timestamp" :style="hasError?{}:{}" type="text" v-model="timeStr" />
-            <span>{{ value.lyric }}</span>
+            <el-editable v-model="value.lyric">{{ value.lyric }}</el-editable>
         </a>
     `,
     props: [ 'value' ],
@@ -99,7 +115,7 @@ Vue.component('elLyricgroup', {
     computed: {
         style() {
             //console.log({ height: `${0.7 * window.innerHeight}px`, overflowY: 'auto' });
-            return { height: `${0.5 * window.innerHeight}px`, overflowY: 'auto' };
+            return { height: `${0.7 * window.innerHeight}px`, overflowY: 'auto' };
         },
         selectedIndex: {
             get() {
